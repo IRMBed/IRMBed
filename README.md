@@ -1,4 +1,4 @@
-### Implementation of IRM methods
+### Implementation of IRM methods with CifarMNIST
 
 How to run the code?
 
