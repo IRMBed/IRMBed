@@ -22,7 +22,6 @@ import numpy as np
 import torch.optim as optim
 
 
-global_dict = {}
 
 def balance_share_batch(x, y, g, args):
     sample_locs = torch.rand(len(x)) <= 1. / args.env_nums
@@ -134,11 +133,6 @@ def irm_main_loss(model, x, y, g, criterion):
         sep_outputs.view(-1), y.float())
 
     penalty_loss = individual_loss - sep_loss
-    global global_dict
-    if global_dict['batch_idx'] % 20==0:
-        print(global_dict['epoch'], global_dict['batch_idx'], "penalty_loss=%.6f" % penalty_loss.item(),
-        "share_loss=%.6f" % individual_loss.item(),
-        "sep_loss=%.6f" % sep_loss.item())
     model.set_sep(False)
     return individual_loss, penalty_loss
 
@@ -209,7 +203,7 @@ def compute_irm_game_free_same_step_penalty_loss(y, group_idx, model, xyg, optim
             optimizer[j+1].zero_grad()
             inner_batch_loss = irm_inner_loss(
                 model, ex, ey, eg, criterion)
-            backward_loss(inner_batch_loss, model, grad_clip=args.grad_clip, retain_graph=True)
+            backward_loss(inner_batch_loss, model, grad_clip=-1, retain_graph=True)
             optimizer[j+1].step()
             optimizer[j+1].zero_grad()
     loss, penalty = torch.tensor(0.0), torch.tensor(0.0)
@@ -301,7 +295,7 @@ def compute_irm_penalty_loss(yhat, y, group_idx, criterion, model, args=None):
             valid_env += 1
             if args.irm_type == "irmv1":
                 e_loss, e_penlaty= _irm_penalty_v1(yhat[ids], y[ids], criterion)
-            if args.irm_type == "irmv1share":
+            if args.irm_type == "irmv1fc":
                 e_loss, e_penlaty= _irm_penalty_v1share(yhat[ids], y[ids], criterion, model)
             elif args.irm_type == "rex":
                 e_loss, e_penlaty=  criterion(yhat[ids].view(-1), y[ids].float()).mean(), torch.tensor(0)
@@ -336,7 +330,7 @@ def backward_loss(loss, model, grad_clip=-1, retain_graph=False):
 
 def step_rep(main_loss, optimizer, model, args):
     optimizer[0].zero_grad()
-    backward_loss(main_loss, model, grad_clip=args.grad_clip)
+    backward_loss(main_loss, model, grad_clip=-1)
     optimizer[0].step()
 
 def step_rep_share(main_loss, optimizer, model, args):
@@ -346,29 +340,29 @@ def step_rep_share(main_loss, optimizer, model, args):
         rep_share_num = 1
 
     [optimizer[oi].zero_grad() for oi in range(rep_share_num)]
-    backward_loss(main_loss, model, grad_clip=args.grad_clip)
+    backward_loss(main_loss, model, grad_clip=-1)
     [optimizer[oi].step() for oi in range(rep_share_num)]
 
 def step_share(main_loss, optimizer, model, args, retain_graph=False):
     optimizer[1].zero_grad()
-    backward_loss(main_loss, model, grad_clip=args.grad_clip, retain_graph=retain_graph)
+    backward_loss(main_loss, model, grad_clip=-1, retain_graph=retain_graph)
     optimizer[1].step()
 
 def step_env_share(main_loss, optimizer, model, args, retain_graph=False):
     optimizer[3].zero_grad()
-    backward_loss(main_loss, model, grad_clip=args.grad_clip, retain_graph=retain_graph)
+    backward_loss(main_loss, model, grad_clip=-1, retain_graph=retain_graph)
     optimizer[3].step()
 
 def step_sep(main_loss, optimizer, model, args):
     # optimizer order: rep, share, sep, rho
     optimizer[2].zero_grad()
-    backward_loss(main_loss, model, grad_clip=args.grad_clip)
+    backward_loss(main_loss, model, grad_clip=-1)
     optimizer[2].step()
 
 def step_env_sep(main_loss, optimizer, model, args):
     # optimizer order: rep, share, sep, rho
     optimizer[4].zero_grad()
-    backward_loss(main_loss, model, grad_clip=args.grad_clip)
+    backward_loss(main_loss, model, grad_clip=-1)
     optimizer[4].step()
 
 def weight_norm(model):
@@ -378,12 +372,12 @@ def weight_norm(model):
     return weight_norm
 
 def run_epoch_train(
-    epoch, model, optimizer, loader, loader_iter, logger, csv_logger, args,
+    epoch, model, optimizer, loader, loader_iter, logger, args,
               is_training,scheduler=None, irm_penalty_weight=0):
     model.train()
     ees = EpochStat("Train%s" % epoch)
     criterion = nn.BCEWithLogitsLoss()
-    if args.irm_type in ["stepfree", "stepgame"]:
+    if args.irm_type in ["invrat", "irmgame"]:
         inner_loader_iter = iter(loader)
     else:
         inner_loader_iter = None
@@ -411,7 +405,7 @@ def run_epoch_train(
                 step_rep_share(main_loss, optimizer, model, args)
                 penalty = torch.tensor(0.)
             else:
-                if args.irm_type in ["rex", "irmv1",'rvp', "irmv1share"]:
+                if args.irm_type in ["rex", "irmv1",'rvp', "irmv1fc"]:
                     #--------other loss-------#
                     model.set_sep(False)
                     outputs = model(x)
@@ -419,18 +413,17 @@ def run_epoch_train(
                     loss = criterion(outputs.view(-1), y.float())
                     #--------penalty-------#
                     _, penalty = compute_irm_penalty_loss(outputs, y, g, criterion, model, args)
-                    penalty = penalty * args.amplifier
                     main_loss = (loss + args.weight_decay* l2_loss + irm_penalty_weight * penalty) / (1 + irm_penalty_weight)
                     #--------update-------#
                     step_share(loss, optimizer, model, args, retain_graph=True)
                     step_rep(main_loss, optimizer, model, args)
-                elif args.irm_type in ["stepfree", "stepgame"]:
+                elif args.irm_type in ["invrat", "irmgame"]:
                     #----penalty loss ------#
                     model.set_sep(False)
                     xyg=(x, y, g)
-                    elif args.irm_type == "stepfree":
+                    if args.irm_type == "invrat":
                         _, penalty, inner_loader_iter = compute_irm_free_same_step_penalty_loss(y, g, model, xyg, optimizer, loader, inner_loader_iter, criterion, args)
-                    elif args.irm_type == "stepgame":
+                    elif args.irm_type == "irmgame":
                         _, penalty, inner_loader_iter = compute_irm_game_free_same_step_penalty_loss(y, g, model, xyg, optimizer, loader, inner_loader_iter, criterion, args)
                     else:
                         raise("Invalid irm_type!")
@@ -439,7 +432,6 @@ def run_epoch_train(
                     outputs = model(x)
                     l2_loss = weight_norm(model)
                     loss = criterion(outputs.view(-1), y.float())
-                    penalty = penalty * args.amplifier
                     main_loss = (loss + args.weight_decay* l2_loss + irm_penalty_weight * penalty) / (1 + irm_penalty_weight)
                     step_rep(main_loss, optimizer, model, args)
                 else:
@@ -465,7 +457,7 @@ def run_epoch_train(
         return ees.get_summary()
 
 
-def run_epoch_val(epoch, model, loader, loader_iter, logger, csv_logger, args, val_test):
+def run_epoch_val(epoch, model, loader, loader_iter, logger, args, val_test):
     assert val_test in ['val', 'test']
     model.eval()
     criterion = nn.BCEWithLogitsLoss()
@@ -490,8 +482,7 @@ def configure_optimizers(args, model):
     return model.get_optimizer_schedule(args)
 
 def train(model, dataset,
-          logger, train_csv_logger, val_csv_logger, test_csv_logger,
-          args, logger_path,  epoch_offset):
+          logger, args):
 
     model = model.cuda()
 
@@ -500,7 +491,7 @@ def train(model, dataset,
     train_loader_iter = iter(dataset["train_loader"])
     val_loader_iter = iter(dataset["val_loader"])
     test_loader_iter = iter(dataset["test_loader"])
-    for epoch in range(epoch_offset, epoch_offset+args.n_epochs):
+    for epoch in range(args.n_epochs):
         if args.irm_anneal_epochs > 0 and epoch < args.irm_anneal_epochs:
             if args.irm_anneal_type == "jump":
                 irm_penalty_weight = 0
@@ -516,7 +507,7 @@ def train(model, dataset,
             epoch, model, optimizer,
             dataset['train_loader'],
             train_loader_iter,
-            logger, train_csv_logger, args,
+            logger, args,
             is_training=True,
             scheduler=scheduler,
             irm_penalty_weight=irm_penalty_weight)
@@ -525,5 +516,5 @@ def train(model, dataset,
             epoch, model,
             dataset['test_loader'],
             test_loader_iter,
-            logger, test_csv_logger, args,
+            logger, args,
             val_test="test")

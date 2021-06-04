@@ -320,11 +320,11 @@ class ResNetSepFcOFC(nn.Module):
                     lr=args.lr)
                 optimizer_share = opt_fun(
                     filter(lambda p:id(p) in self.share_param_id(), self.parameters()),
-                    momentum=args.w_momentum,
+                    momentum=0.9,
                     lr=args.lr * args.penalty_wlr)
                 optimizer_sep = opt_fun(
                     filter(lambda p:id(p) in self.sep_param_id(), self.parameters()),
-                    momentum=args.w_momentum,
+                    momentum=0.9,
                     lr=args.lr * args.penalty_welr)
             else:
                 raise Exception
@@ -354,6 +354,163 @@ class ResNetSepFcOFC(nn.Module):
                 step_size=int(args.n_epochs/3.),
                 gamma=args.step_gamma)
             return [optimizer], [scheduler]
+
+class ResNetSepFcInvRat(ResNetSepFcOFC):
+
+    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
+                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
+                 norm_layer=None):
+        nn.Module.__init__(self)
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        self._norm_layer = norm_layer
+
+        self.inplanes = 64
+        self.dilation = 1
+        if replace_stride_with_dilation is None:
+            # each element in the tuple indicates if we should replace
+            # the 2x2 stride with a dilated convolution instead
+            replace_stride_with_dilation = [False, False, False]
+        if len(replace_stride_with_dilation) != 3:
+            raise ValueError("replace_stride_with_dilation should be None "
+                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+        self.groups = groups
+        self.base_width = width_per_group
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        self.bn1 = norm_layer(self.inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+                                       dilate=replace_stride_with_dilation[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+                                       dilate=replace_stride_with_dilation[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+                                       dilate=replace_stride_with_dilation[2])
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        num_classes = 1
+        self.num_classes = 1
+        # self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.class_classifier = nn.Linear(512 * block.expansion, num_classes)
+        # TODO fix the hard code of embeding dim
+        # 4 denotes num of environment, 128 denotes the embedding dimension
+        self.env_embedding = torch.nn.Embedding(4, 128)
+        self.class_classifier_sep = nn.Linear(512 * block.expansion + 128, num_classes)
+        self.sep=False
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+        # Zero-initialize the last BN in each residual branch,
+        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
+        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    nn.init.constant_(m.bn3.weight, 0)
+                elif isinstance(m, BasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)
+
+
+    def init_sep_by_share(self):
+        # pass since the structure are different
+        pass
+
+
+    def forward(self, x, group_idx=None, only_backward_fc=False):
+        #if self.training or self.norm_layer != batchnorm_dson.BatchNorm2d:
+
+        if only_backward_fc:
+            # assert self.sep
+            assert group_idx is not None
+            with torch.no_grad():
+                x = self.encoder(x)
+        else:
+            x = self.encoder(x)
+        self.fp = x
+
+        if self.sep is False:
+            return self.class_classifier(x)
+        else:
+            assert group_idx is not None
+            env_feature = self.env_embedding(group_idx.long())
+            output = self.class_classifier_sep(torch.cat([x, env_feature], dim=1))
+            return output
+
+
+class ResNetSep2FcInvRat(ResNetSepFcInvRat):
+
+    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
+                 groups=1, width_per_group=64, replace_stride_with_dilation=None,
+                 norm_layer=None):
+        nn.Module.__init__(self)
+        if norm_layer is None:
+            norm_layer = nn.BatchNorm2d
+        self._norm_layer = norm_layer
+
+        self.inplanes = 64
+        self.dilation = 1
+        if replace_stride_with_dilation is None:
+            # each element in the tuple indicates if we should replace
+            # the 2x2 stride with a dilated convolution instead
+            replace_stride_with_dilation = [False, False, False]
+        if len(replace_stride_with_dilation) != 3:
+            raise ValueError("replace_stride_with_dilation should be None "
+                             "or a 3-element tuple, got {}".format(replace_stride_with_dilation))
+        self.groups = groups
+        self.base_width = width_per_group
+        self.conv1 = nn.Conv2d(3, self.inplanes, kernel_size=7, stride=2, padding=3,
+                               bias=False)
+        self.bn1 = norm_layer(self.inplanes)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
+                                       dilate=replace_stride_with_dilation[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
+                                       dilate=replace_stride_with_dilation[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
+                                       dilate=replace_stride_with_dilation[2])
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        num_classes = 1
+        self.num_classes = 1
+        # self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.class_classifier = nn.Sequential(
+                                nn.Linear(512 * block.expansion, 512 * block.expansion),
+                                nn.ReLU(inplace=True),
+                                nn.Linear(512 * block.expansion, num_classes))
+        # TODO fix the hard code of embeding dim
+        # 4 denotes num of environment, 128 denotes the embedding dimension
+        self.env_embedding = torch.nn.Embedding(4, 128)
+        hidden_dim = 512 * block.expansion
+        self.class_classifier_sep = nn.Sequential(
+                                nn.Linear(512 * block.expansion+128, hidden_dim),
+                                nn.ReLU(inplace=True),
+                                nn.Linear(hidden_dim, num_classes))
+        self.sep=False
+
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
+
+        # Zero-initialize the last BN in each residual branch,
+        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
+        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    nn.init.constant_(m.bn3.weight, 0)
+                elif isinstance(m, BasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)
+
 
 class ResNetSep2FcInvRat(ResNetSepFcInvRat):
 
@@ -554,7 +711,7 @@ def _resnet_sepfc_game(arch, block, layers, pretrained, progress, **kwargs):
     return model
 
 
-def resnet18_sepfc_ofc(pretrained=False, progress=True, **kwargs):
+def resnet18_invrat_ec(pretrained=False, progress=True, **kwargs):
     return _resnet_sepfc_ofc('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
                    **kwargs)
 
@@ -570,30 +727,30 @@ def _resnet_sep2fc_invrat(arch, block, layers, pretrained, progress, **kwargs):
     return model
 
 
-def resnet50_sepfc_ofc(pretrained=False, progress=True, **kwargs):
+def resnet50_invrat_ec(pretrained=False, progress=True, **kwargs):
     return _resnet_sepfc_ofc(
         'resnet50', Bottleneck,
         [3, 4, 6, 3], pretrained, progress,
         **kwargs)
 
-def resnet18_sep2fc_invrat(pretrained=False, progress=True, **kwargs):
+def resnet18_invrat_eb(pretrained=False, progress=True, **kwargs):
     return _resnet_sep2fc_invrat('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
                    **kwargs)
 
-def resnet50_sep2fc_invrat(pretrained=False, progress=True, **kwargs):
+def resnet50_invrat_eb(pretrained=False, progress=True, **kwargs):
     return _resnet_sep2fc_invrat(
         'resnet50', Bottleneck,
         [3, 4, 6, 3], pretrained, progress,
         **kwargs)
 
 
-def resnet50_sepfc_game(pretrained=False, progress=True, **kwargs):
+def resnet50_irmgame(pretrained=False, progress=True, **kwargs):
     return _resnet_sepfc_game(
         'resnet50', Bottleneck,
         [3, 4, 6, 3], pretrained, progress,
         **kwargs)
 
-def resnet18_sepfc_game(pretrained=False, progress=True, **kwargs):
+def resnet18_irmgame(pretrained=False, progress=True, **kwargs):
     return _resnet_sepfc_game('resnet18', BasicBlock, [2, 2, 2, 2], pretrained, progress,
                    **kwargs)
 

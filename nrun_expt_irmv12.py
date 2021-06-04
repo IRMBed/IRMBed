@@ -7,12 +7,14 @@ import torch
 import torch.nn as nn
 import torchvision
 
-from models import model_attributes, ModelFeature, MLP2, get_norm_laryer
-from resnet_ofc import resnet18_sepfc_ofc, resnet18_sepslc_ofc, resnet50_sepslc_ofc, resnet50_sepfc_ofc
-from resnet_ofc import resnet18_sep2fc_invrat, resnet50_sep2fc_invrat
-from resnet_ofc import resnet50_sepfc_game, resnet18_sepfc_game
+from resnet_ofc import resnet18_invrat_ec,resnet50_invrat_ec
+from resnet_ofc import resnet18_invrat_eb, resnet50_invrat_eb
+from resnet_ofc import resnet50_irmgame, resnet18_irmgame
+# resnet18 is the same structre with resnet18_invrat_ec
+from resnet_ofc import resnet18_invrat_ec as resnet18
+from resnet_ofc import resnet50_invrat_ec as resnet50
 from data.cm_spurious_dataset import get_data_loader_cifarminst
-from utils import set_seed, Logger, LYCSVLogger, CSVBatchLogger, log_args
+from utils import set_seed, Logger, log_args
 from ntrain_irmv12 import train
 
 
@@ -20,18 +22,17 @@ def main():
     parser = argparse.ArgumentParser()
 
     # Settings
+    parser.add_argument(
+        '--model', default='resnet18')
     parser.add_argument('-d', '--dataset', required=True)
     parser.add_argument('--val_percentage', default=0.1, type=float)
     parser.add_argument('--cons_ratios', default='0.9,0.8,0.1', type=str)
     parser.add_argument('--train_envs_ratio', default='-1', type=str)
     parser.add_argument('--label_noise_ratio', default=0, type=float)
     parser.add_argument('--step_gamma', default=0.2, type=float)
-    parser.add_argument('--clear_momentum', type=int, choices=[0, 1], default=1)
     parser.add_argument('--oracle', default=0, type=int, choices=[0, 1])
     parser.add_argument('--irm_penalty', default=False, action='store_true')
-    parser.add_argument('--positive_constrain', default=1, type=int, choices=[0, 1])
-    parser.add_argument('--balance_share_sep_batch', default=0, type=int, choices=[0, 1])
-    parser.add_argument('--irm_type', default="irmv1", choices=["stepfree", "stepgame", "irmv1", "rex", "erm", "rvp"], type=str)
+    parser.add_argument('--irm_type', default="irmv1", choices=["invrat", "irmgame", "irmv1", "irmv1fc", "rex", "erm", "rvp"], type=str)
     parser.add_argument('--penalty_wlr', type=float, default=1.0)
     parser.add_argument('--penalty_welr', type=float, default=1.0)
     parser.add_argument('--lr_schedule_type', type=str, default="step")
@@ -54,7 +55,7 @@ def main():
     set_seed(args.seed)
 
     if args.oracle:
-        print("LYWARNING:Using ORACLE dataset!!!!!")
+        print("WARNING:Using ORACLE dataset!!!!!")
     get_loader_x = get_data_loader_cifarminst
     train_num=10000
     test_num=1800
@@ -73,7 +74,7 @@ def main():
         train_envs_ratio=ratio_list,
         label_noise_ratio=args.label_noise_ratio,
         color_spurious=0,
-        transform_data_to_standard=1
+        transform_data_to_standard=1,
         oracle=args.oracle)
     data={}
     data['train_loader'] = train_loader
@@ -89,31 +90,27 @@ def main():
 
 
     pretrained = args.pretrained
-    if args.model == 'resnet18_sepfc_ofc':
-        model = resnet18_sepfc_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet18_sepslc_ofc':
-        model = resnet18_sepslc_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet50_sepfc_ofc':
-        model = resnet50_sepfc_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet50_sepfc2_ofc':
-        model = resnet50_sepfc2_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet18_sepfc2_ofc':
-        model = resnet18_sepfc2_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet18_sepfc_game':
-        model = resnet18_sepfc_game(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet50_sepfc_game':
-        model = resnet50_sepfc_game(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == 'resnet50_sepslc_ofc':
-        model = resnet50_sepslc_ofc(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == "resnet18_sep2fc_invrat":
-        model = resnet18_sep2fc_invrat(pretrained=pretrained, num_classes=n_classes)
-    elif args.model == "resnet50_sep2fc_invrat":
-        model = resnet50_sep2fc_invrat(pretrained=pretrained, num_classes=n_classes)
+    if args.model == 'resnet18':
+        model = resnet18(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == 'resnet50':
+        model = resnet50(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == 'resnet18_invrat_ec':
+        model = resnet18_invrat_ec(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == 'resnet50_invrat_ec':
+        model = resnet50_invrat_ec(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == 'resnet18_irmgame':
+        model = resnet18_irmgame(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == 'resnet50_irmgame':
+        model = resnet50_irmgame(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == "resnet18_invrat_eb":
+        model = resnet18_invrat_eb(pretrained=pretrained, num_classes=n_classes)
+    elif args.model == "resnet50_invrat_eb":
+        model = resnet50_invrat_eb(pretrained=pretrained, num_classes=n_classes)
     else:
         raise ValueError('Model not recognized.')
 
 
-    train(model, data, None, train_csv_logger, val_csv_logger, test_csv_logger, args, logger_path, epoch_offset=epoch_offset)
+    train(model, data, None, args)
 
 if __name__=='__main__':
     main()
