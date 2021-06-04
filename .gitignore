@@ -1,0 +1,17 @@
+*.txt
+tmp
+datasets
+tmp*
+simplicitybiaspitfalls
+fig/*
+colored_mnist
+meta_run
+tmp_logs
+*.pyc
+logs
+data/data
+*.ipynb
+*.csv
+wandb
+*.pyc
+log
