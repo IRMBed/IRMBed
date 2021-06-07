@@ -1,9 +1,9 @@
 ### Implementation of IRM methods with CifarMNIST
 
 How to run the code?
-
+```
 python nrun_expt_irmv12.py  -d SPCM --cons_ratios 0.999_0.95_0.9_0.8_0.1 --label_noise_ratio 0.10 --irm_type invrat  --lr 0.01 --batch_size 128 --weight_decay 0.0001 --model resnet18_invrat_ec --n_epoch 100  --opt SGD  --irm_penalty --irm_penalty_weight 100 --num_inners 1  --seed 0
-
+```
 ### set the pramater
 "--cons_ratios" # setting of environment. 
 cons_ratios specify the correlation of the spurious feature with the label for both training and testing data set.
