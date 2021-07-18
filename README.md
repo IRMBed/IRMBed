@@ -12,17 +12,17 @@ Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synt
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
 
 |Model|  ResNet-18(2Env)   | ResNet-18(4Env)  | ResNet-50(2Env) | ResNet-50(4Env)|
-|Model|  ----  | ----  |  ----  | ----  |
+|----|  ----  | ----  |  ----  | ----  |
 |  ERM   | 39.5±0.4 |35.7±0.7 |38.1±0.8|32.0±2.1|
-|  IRMv1 |  | |||
-|  REx   |  | |||
-|  RVP   |  | |||
-|  IRMGame   |  | |||
-|  InvRat-EB   |  | |||
-|  InvRat-EC   |  | |||
-
+|  IRMv1 | 70.8±0.4|53.6±3.1|43.3±12.5|51.8±4.9|
+|  REx   | 52.5±2.2 |44.5±1.7 |51.1±2.2|37.6±7.3|
+|  RVP   | 49.4±3.1 |49.4±1.1 |50.2±0.3|50.1±0.7|
+|  IRMGame   | 43.0±1.9 | 37.2±2.8|44.5±1.5|40.1±5.5|
+|  InvRat-EB   | 77.6±2.0 | 68.6±9.4|68.5±3.6|36.8±3.1|
+|  InvRat-EC   | 75.8±1.2 | 73.4±4.0 |81.2±1.3|77.9±4.2|
+For detailed explanation of these results, please refer to our workshop paper.
 ### How to run the code
-How to run the code?
+How to run the code?Here is an exmaple for InvRat-EC.
 ```
 python nrun_expt_irmv12.py  -d SPCM --cons_ratios 0.999_0.95_0.9_0.8_0.1 --label_noise_ratio 0.10 --irm_type invrat  --lr 0.01 --batch_size 128 --weight_decay 0.0001 --model resnet18_invrat_ec --n_epoch 100  --opt SGD  --irm_penalty --irm_penalty_weight 100 --num_inners 1  --seed 0
 ```
@@ -41,7 +41,6 @@ For example,  "0.999_0.95_0.9_0.8_0.1" stands for 4 enviornments in training dat
 
 "--num_inners" # number of inner steps for invrat.
 
-Have fun with it.
 
 ### References
 
