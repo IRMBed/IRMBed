@@ -37,7 +37,8 @@ For example,  "0.999_0.95_0.9_0.8_0.1" stands for 4 enviornments in training dat
 
 "--irm_type" # the IRM method to run, choose in {invrat, irmv1, rex, rvp, irmgame}
 
-"--model" # the deep network to run, choose in {resnet18, resnet50, resnet18_invrat_ec, resnet18_invrat_ec, resnet50_invrat_ec, resnet50_invrat_ec}
+"--model" # the deep network to run, choose in {resnet18, resnet50, resnet18_invrat_eb, resnet50_invrat_eb, 
+resnet18_invrat_ec, resnet50_invrat_ec}. For models except invrat, please choose resnet18 or resnet50.
 
 "--irm_penalty_weight" # penalty weight
 
