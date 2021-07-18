@@ -11,6 +11,16 @@ Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synt
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
 
+|Model|  ResNet-18(2Env)   | ResNet-18(4Env)  | ResNet-50(2Env) | ResNet-50(4Env)|
+|Model|  ----  | ----  |  ----  | ----  |
+|  ERM   | 39.5±0.4 |35.7±0.7 |38.1±0.8|32.0±2.1|
+|  IRMv1 |  | |||
+|  REx   |  | |||
+|  RVP   |  | |||
+|  IRMGame   |  | |||
+|  InvRat-EB   |  | |||
+|  InvRat-EC   |  | |||
+
 ### How to run the code
 How to run the code?
 ```
