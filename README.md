@@ -20,6 +20,8 @@ We consider two settings for the training sets: 1). 2 Env: the training data con
 |  IRMGame   | 43.0±1.9 | 37.2±2.8|44.5±1.5|40.1±5.5|
 |  InvRat-EB   | 77.6±2.0 | 68.6±9.4|68.5±3.6|36.8±3.1|
 |  InvRat-EC   | 75.8±1.2 | 73.4±4.0 |81.2±1.3|77.9±4.2|
+
+
 For detailed explanation of these results, please refer to our workshop paper.
 ### How to run the code
 How to run the code?Here is an exmaple for InvRat-EC.
