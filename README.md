@@ -2,18 +2,14 @@
 HI, this is the project of ICML2021 workshop UDL paper: Yong Lin, Qing Lian and Tong Zhang. An Empirical Study of Invariant Risk Minimization on Deep Models.
 
 We aim to study IRM methods on deep models. Now, Resnet18 amd Resnet50 are supported.
+
 We offer the implementation of IRMv1[1], InvRat[2], REx[3], RVP[4], IRMGame[5].
-[1] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D.  Invariant risk minimization.
-[2] Chang, S., Zhang, Y., Yu, M., & Jaakkola, T.  Invariant rationalization.
-[3] Krueger, D., Caballero, E., Jacobsen, J. H., Zhang, A., Binas, J., Zhang, D., ... & Courville, A.  Out-of-distribution generalization via risk extrapolation (rex).
-[4] Xie, C., Chen, F., Liu, Y., & Li, Z. Risk variance penalization: From distributional robustness to causality
-[5] Ahuja, K., Shanmugam, K., Varshney, K., & Dhurandhar, A. Invariant risk minimization games.
+
 ### The dataset:MNIST-Cifar10
-Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant.\\
-[6] Shah, Harshay and Tamuly, Kaustav and Raghunathan, Aditi and Jain, Prateek and Netrapalli, Praneeth. The pitfalls of simplicity bias in neural networks
+Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant.
+
 ### Results
-We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. 
-We also add a certain level (10%) of noise to label as [1] does. 
+We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
 
 ### How to run the code
 How to run the code?
@@ -38,3 +34,17 @@ For example,  "0.999_0.95_0.9_0.8_0.1" stands for 4 enviornments in training dat
 Have fun with it.
 
 ### References
+
+
+[1] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D.  Invariant risk minimization.
+
+[2] Chang, S., Zhang, Y., Yu, M., & Jaakkola, T.  Invariant rationalization.
+
+[3] Krueger, D., Caballero, E., Jacobsen, J. H., Zhang, A., Binas, J., Zhang, D., ... & Courville, A.  Out-of-distribution generalization via risk extrapolation (rex).
+
+[4] Xie, C., Chen, F., Liu, Y., & Li, Z. Risk variance penalization: From distributional robustness to causality
+
+[5] Ahuja, K., Shanmugam, K., Varshney, K., & Dhurandhar, A. Invariant risk minimization games.
+
+[6] Shah, Harshay and Tamuly, Kaustav and Raghunathan, Aditi and Jain, Prateek and Netrapalli, Praneeth. The pitfalls of simplicity bias in neural networks
+
