@@ -43,8 +43,15 @@ resnet18_invrat_ec, resnet50_invrat_ec}. For models except invrat, please choose
 "--irm_penalty_weight" # penalty weight
 
 "--num_inners" # number of inner steps for invrat.
-
-
+### Requirements
+```
+pandas==1.1.5
+pytorch-transformers==1.2.0
+torch==1.3.1
+torchvision==0.4.2
+tqdm==4.26.0
+numpy==1.19.4
+```
 ### References
 
 
