@@ -15,7 +15,7 @@ from resnet_ofc import resnet18_invrat_ec as resnet18
 from resnet_ofc import resnet50_invrat_ec as resnet50
 from data.cm_spurious_dataset import get_data_loader_cifarminst
 from utils import set_seed, Logger, log_args
-from ntrain_irmv12 import train
+from train import train
 
 
 def main():
