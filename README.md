@@ -56,6 +56,16 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 
 * `num_inners`" # number of inner steps for `invrat`.
 
+### Citation
+```
+@article{yong2021empirical,
+  title={An Empirical Study of Invariant Risk Minimization on Deep Models},
+  author={Yong Lin and Qing Lian and Tong Zhang},
+  journal={ICML 2021 Workshop on Uncertainty and Robustness in Deep Learning},
+  year={2021}
+}
+```
+
 ### References
 
 
@@ -71,3 +81,7 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 
 [6] Shah, Harshay and Tamuly, Kaustav and Raghunathan, Aditi and Jain, Prateek and Netrapalli, Praneeth. The pitfalls of simplicity bias in neural networks
 
+### Contact
+Please submit a github issue if you have any problem on this project.
+You can also send email to `ylindf@connect.ust.hk` for personal contact.
+If you are also interested in IRM and want to discuss with me, you can also add with me(`linyongverycool`) by Wechat. 
