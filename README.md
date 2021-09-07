@@ -27,10 +27,10 @@ IRMBed also provide interface for user specified dataset. Two steps are needed t
 
 ### Outputs
 The project outputs the trained model and prints the performance of the model.
-  The trained model is saved in `results/model.pth`;
-  The performance of the model on each environment of training and testing dataset at each epoch: 
-    `loss` is the empirical loss, `penalty` is the invariance penalty and `main_loss` is the weighted sum of `loss` and `penalty` by the irm penalty weight;
-    `acc` is the precision of the model on the data from a specific environment; `major_acc` and `minor_acc`
+  * The trained model is saved in `results/model.pth`;
+  * The performance of the model on each environment of training and testing dataset at each epoch: 
+    * `loss` is the empirical loss, `penalty` is the invariance penalty and `main_loss` is the weighted sum of `loss` and `penalty` by the irm penalty weight;
+    * `acc` is the precision of the model on the data from a specific environment; `major_acc` and `minor_acc`
 
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
