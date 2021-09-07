@@ -65,6 +65,7 @@ def main():
         ratio_list = [1. / train_envs] * (train_envs)
     else:
         ratio_list = [float(x) for x in args.train_envs_ratio.split("_")]
+    #------------loading Cifar-Mnist Datset---#
     args.env_nums = len(ratio_list)
     spd, train_loader, val_loader, test_loader, train_data, val_data, test_data = get_loader_x(
         batch_size=args.batch_size,
@@ -83,13 +84,14 @@ def main():
     data['train_data'] = train_data
     data['val_data'] = val_data
     data['test_data'] = test_data
-
     n_classes=spd.n_classes
-    feature_dim = spd.feature_dim
-    args.env_nums = spd.n_train_envs
-
+    env_nums = spd.n_train_envs
+    #---loading Cifar-Mnist Datset Ended---#
+    #---You can replace the dataset by your own--#
+    # data['train_data'], data['val_data'], data['test_data'] are the traning, validation and testing dataset, you should use the implement the dataset by the torch object Dataset().
 
     pretrained = args.pretrained
+    args.env_nums = spd.n_train_envs
     if args.model == 'resnet18':
         model = resnet18(pretrained=pretrained, num_classes=n_classes)
     elif args.model == 'resnet50':
