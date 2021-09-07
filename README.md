@@ -22,10 +22,16 @@ Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synt
 
 #### User Input Dataset
 IRMBed also provide interface for user specified dataset. Two steps are needed to 
-* Implement the `SpuriousDataset` in `data.py` by passing `x`(the feature tensor), `y`(the label tensor), `e`(the environment index tensor) and `sp`(optional, the tensor of indicators that whether the spurious features are consistent with the label).
+* Implement the `SpuriousDataset` in `data/data.py` by passing `x`(the feature tensor), `y`(the label tensor), `e`(the environment index tensor) and `sp`(optional, the tensor of indicators that whether the spurious features are consistent with the label).
 * Pass the Trainging and Testing dataset to `data_processor` in `run.py`. In addition, one also need to  provide the total environment number `env_nums` and class number`n_classes`.  
-* 
+
 ### Outputs
+The project outputs the trained model and prints the performance of the model.
+* The trained model is saved in `results/model.pth`;
+* The performance of the model on each environment of training and testing dataset at each epoch: 
+** `loss` is the empirical loss, `penalty` is the invariance penalty and `main_loss` is the weighted sum of `loss` and `penalty` by the irm penalty weight;
+** `acc` is the precision of the model on the data from a specific environment; `major_acc` and `minor_acc`
+
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
 
@@ -75,8 +81,6 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 ```
 
 ### References
-
-
 [1] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D.  Invariant risk minimization.
 
 [2] Chang, S., Zhang, Y., Yu, M., & Jaakkola, T.  Invariant rationalization.
