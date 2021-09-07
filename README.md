@@ -19,6 +19,10 @@ To install the required packages, please run `pip install -r requirements.txt`
 Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant. The illustration of the dataset is shown as following:
 ![Illustration of the synthetic dataset from CIFAR-10 and MNIST. We first randomly select two classes ("car" and "bird") from CIFAR-10. Then each CIFAR-10 image is concatanated with an image from MNIST ("0" and "1"). The CIFAR-10  component serves as the invariant feature and the label is generated from the CIFAR-10 component. The MNIST component serves as the spurious feature. The MNIST component is highly correlated with the label in the training dataset,  however, the correlation reverses in the testing dataset. ](./dataset_illustration.png)
 
+IRMBed also provide interface for user specified dataset. Two steps are needed to 
+* Implement the `SpuriousDataset` by passing `x`(the feature tensor), `y`(the label tensor), `e`(the environment index tensor) and `sp`(optional, the tensor of indicators that whether the spurious features are consistent with the label).
+* Pass the Trainging and Testing dataset to ``. In addition, one need also provide the total environment number and class number.  
+
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
 
@@ -55,6 +59,8 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 * `irm_penalty_weight`" # penalty weight
 
 * `num_inners`" # number of inner steps for `invrat`.
+
+### Outputs
 
 ### Citation
 ```
