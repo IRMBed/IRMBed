@@ -1,10 +1,11 @@
 ### IRMBed: the test bed for IRM methods on deep models
-HI, this is the project of ICML2021 workshop UDL paper: Yong Lin, Qing Lian and Tong Zhang. An Empirical Study of Invariant Risk Minimization on Deep Models.
+HI, this is the project of ICML2021 workshop UDL paper: Yong Lin, Qing Lian and Tong Zhang. [`An Empirical Study of Invariant Risk Minimization on Deep Models.`](http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-044.pdf)
 
 We aim to study IRM methods on deep models. Now, Resnet18 amd Resnet50 are supported.
 
 We offer the implementation of IRMv1[1], InvRat[2], REx[3], RVP[4], IRMGame[5].
 ### Requirements
+The program runs with the following packages.
 ```
 pandas==1.1.5
 pytorch-transformers==1.2.0
@@ -13,6 +14,7 @@ torchvision==0.4.2
 tqdm==4.26.0
 numpy==1.19.4
 ```
+To install the required packages, please run `pip install -r requirements.txt`
 ### The dataset:MNIST-Cifar10
 Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant. The illustration of the dataset is shown as following:
 ![Illustration of the synthetic dataset from CIFAR-10 and MNIST. We first randomly select two classes ("car" and "bird") from CIFAR-10. Then each CIFAR-10 image is concatanated with an image from MNIST ("0" and "1"). The CIFAR-10  component serves as the invariant feature and the label is generated from the CIFAR-10 component. The MNIST component serves as the spurious feature. The MNIST component is highly correlated with the label in the training dataset,  however, the correlation reverses in the testing dataset. ](./dataset_illustration.png)
