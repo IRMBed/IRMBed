@@ -84,4 +84,4 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 ### Contact
 Please submit a github issue if you have any problem on this project.
 You can also send email to `ylindf@connect.ust.hk` for personal contact.
-If you are also interested in IRM and want to discuss with me, you can also add with me(`linyongverycool`) by Wechat. 
+If you are also interested in IRM and want to discuss with me, you can also chat with me(`linyongverycool`) by Wechat. 
