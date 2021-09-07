@@ -42,7 +42,7 @@ CUDA_VISIBLE_DEVICES=<GPU_ID> python run.py  -d SPCM --cons_ratios 0.999_0.95_0.
 ### Set the pramater
 "--`cons_ratios`" # setting of environment. 
 cons_ratios specify the correlation of the spurious feature with the label for both training and testing data set.
-For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training datset, whose spurious correlations are (0.999, 0.95, 0.9, 0.8) and 1 enviornment in testing dataset, whose spurious correlation is 0.1;
+For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training datset, whose spurious correlations are (0.999, 0.95, 0.9, 0.8) and one enviornment in testing dataset, whose spurious correlation is 0.1;
 
 "--`label_noise_ratio`" # noise ratio of label, in this provided example, there are 10% label noise.
 
