@@ -40,7 +40,7 @@ How to run the code?Here is an exmaple for InvRat-EC.
 CUDA_VISIBLE_DEVICES=<GPU_ID> python run.py  -d SPCM --cons_ratios 0.999_0.95_0.9_0.8_0.1 --label_noise_ratio 0.10 --irm_type invrat  --lr 0.01 --batch_size 128 --weight_decay 0.0001 --model resnet18_invrat_ec --n_epoch 100  --opt SGD  --irm_penalty --irm_penalty_weight 100 --num_inners 1  --irm_anneal_epochs 2 --seed 0
 ```
 ### Set the pramater
-"--`cons_ratios`" # setting of environment. 
+* --`cons_ratios` # setting of environment. 
 cons_ratios specify the correlation of the spurious feature with the label for both training and testing data set.
 For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training datset, whose spurious correlations are (0.999, 0.95, 0.9, 0.8) and one enviornment in testing dataset, whose spurious correlation is 0.1;
 
