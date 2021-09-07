@@ -1,5 +1,5 @@
 ### IRMBed: the test bed for IRM methods on deep models
-HI, this is the project of ICML2021 workshop UDL paper: Yong Lin, Qing Lian and Tong Zhang. [`An Empirical Study of Invariant Risk Minimization on Deep Models.`](http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-044.pdf)
+HI, this is the project of ICML2021 workshop UDL paper by Yong Lin, Qing Lian and Tong Zhang: [`An Empirical Study of Invariant Risk Minimization on Deep Models.`](http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-044.pdf)
 
 We aim to study IRM methods on deep models. Now, Resnet18 amd Resnet50 are supported.
 
@@ -34,26 +34,26 @@ We consider two settings for the training sets: 1). 2 Env: the training data con
 
 
 For detailed explanation of these results, please refer to our workshop paper.
-### How to run the code
+### Quick Start
 How to run the code?Here is an exmaple for InvRat-EC.
 ```
 CUDA_VISIBLE_DEVICES=<GPU_ID> python run.py  -d SPCM --cons_ratios 0.999_0.95_0.9_0.8_0.1 --label_noise_ratio 0.10 --irm_type invrat  --lr 0.01 --batch_size 128 --weight_decay 0.0001 --model resnet18_invrat_ec --n_epoch 100  --opt SGD  --irm_penalty --irm_penalty_weight 100 --num_inners 1  --irm_anneal_epochs 2 --seed 0
 ```
 ### Set the pramater
-"--cons_ratios" # setting of environment. 
+"--`cons_ratios`" # setting of environment. 
 cons_ratios specify the correlation of the spurious feature with the label for both training and testing data set.
-For example,  "0.999_0.95_0.9_0.8_0.1" stands for 4 enviornments in training datset, whose spurious correlations are (0.999, 0.95, 0.9, 0.8) and 1 enviornment in testing dataset, whose spurious correlation is 0.1;
+For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training datset, whose spurious correlations are (0.999, 0.95, 0.9, 0.8) and 1 enviornment in testing dataset, whose spurious correlation is 0.1;
 
-"--label_noise_ratio" # noise ratio of label
+"--`label_noise_ratio`" # noise ratio of label, in this provided example, there are 10% label noise.
 
-"--irm_type" # the IRM method to run, choose in {invrat, irmv1, rex, rvp, irmgame}
+"--`irm_type`" # the IRM method to run, choose in {`invrat`, `irmv1`, `rex`, `rvp`, `irmgame`}
 
-"--model" # the deep network to run, choose in {resnet18, resnet50, resnet18_invrat_eb, resnet50_invrat_eb, 
-resnet18_invrat_ec, resnet50_invrat_ec}. For models except invrat, please choose resnet18 or resnet50.
+"--`model`" # the deep network to run, choose in {`resnet18`, `resnet50`, `resnet18_invrat_eb`, `resnet50_invrat_eb`, 
+`resnet18_invrat_ec`, `resnet50_invrat_ec`}. For models except `invrat`, please choose `resnet18` or `resnet50`.
 
-"--irm_penalty_weight" # penalty weight
+"--`irm_penalty_weight`" # penalty weight
 
-"--num_inners" # number of inner steps for invrat.
+"--`num_inners`" # number of inner steps for `invrat`.
 
 ### References
 
