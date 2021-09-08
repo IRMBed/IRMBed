@@ -10,10 +10,10 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset, Subset
 
 class SpuriousDataset(object):
-    def __init__(self, x_array, y_array, env_array, transform=None, sp_array=None):
-        """
-        Explaination of the input data
-        """
+    def __init__(self, x_array, y_array, env_array, sp_array=None, transform=None):
+        assert x_array is not None
+        assert y_array is not None
+        assert env_array is not None
         self.x_array = x_array
         self.y_array = y_array
         self.env_array = env_array
@@ -38,47 +38,6 @@ class SpuriousDataset(object):
             x = x
 
         return x,y,g,sp
-
-
-class SubDataset(SpuriousDataset):
-    def __init__(self, x_array, y_array, env_array, transform=None, sp_array=None):
-        self.x_array = x_array
-        self.y_array = y_array
-        self.env_array = env_array
-        self.sp_array = sp_array
-        self.transform = transform
-        assert len(self.x_array) == len(self.y_array)
-        assert len(self.y_array) == len(self.env_array)
-
-    def __len__(self):
-        return len(self.x_array)
-
-    def __getitem__(self, idx):
-        y = self.y_array[idx]
-        g = self.env_array[idx]
-        if self.sp_array is not None:
-            sp = self.sp_array[idx]
-        else:
-            sp = None
-        img = self.x_array[idx]
-        img = (img *255).astype(np.uint8)
-        img = img.transpose(1, 2, 0)
-        img = Image.fromarray(img)
-        x = self.transform(img)
-
-        return x,y,g,sp
-
-class SpuriousValDataset(Dataset):
-    def __init__(self, val_dataset):
-        self.val_dataset = val_dataset
-
-    def __len__(self):
-        return len(self.val_dataset)
-
-    def __getitem__(self, idx):
-        x, y, g, sp = self.val_dataset.__getitem__(idx)
-        g = g * 0
-        return x, y, g,sp
 
 class CifarMnistSpuriousDataset(Dataset):
     def __init__(self, train_num,test_num,cons_ratios, cifar_classes=(1, 9),train_envs_ratio=None, label_noise_ratio=None, augment_data=True, color_spurious=False, transform_data_to_standard=1, oracle=0):
@@ -111,75 +70,53 @@ class CifarMnistSpuriousDataset(Dataset):
         self.train_transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=True, augment_data=self.augment_data)
         self.eval_transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=False, augment_data=False)
 
-    def __len__(self):
-        return len(self.y_array)
+    def return_train_data(self):
+        return self.return_data_by_index(self.split_dict["train"])
 
-    def __getitem__(self, idx):
-        y = self.y_array[idx]
-        g = self.env_array[idx]
+    def return_train_data(self):
+        return self.return_data_by_index(self.split_dict["test"])
 
-        img = self.x_array[idx]
-        sp = self.sp_array[idx]
+    def return_data_by_index(self, env_idx):
+        xs = []
+        ys = []
+        gs = []
+        sps = []
+        for idx in range(self.y_array):
+            if self.split_array[idx] in env_idx:
+                x = self.x_array[idx]
+                y = self.y_array[idx]
+                g = self.env_array[idx]
+                sp = self.sp_array[idx]
+                xs.append(x)
+                ys.append(y)
+                gs.append(g)
+                sps.append(sp)
         # Figure out split and transform accordingly
-        if self.split_array[idx] in self.split_dict['train']:
-            img = self.train_transform(img)
-        elif self.split_array[idx] in self.split_dict['val'] + self.split_dict['test']:
-            img = self.eval_transform(img)
-        x = img
+        xs = torch.stack(xs)
+        ys = torch.stack(ys)
+        gs = torch.stack(gs)
+        sps = torch.stack(sps)
+        gs = gs - gs.min()
+        return xs, ys, gs, sps
 
-        return x,y,g, sp
-
-    def get_splits(self, splits, train_frac=1.0):
-        subsets = []
-        for split in splits:
-            assert split in ('train','val','test'), split+' is not a valid split'
-            mask = np.isin(self.split_array, self.split_dict[split])
-            num_split = np.sum(mask)
-            indices = np.where(mask)[0]
-            if split == "train":
-                subsets.append(
-                    SubDataset(
-                        x_array=self.x_array[indices],
-                        y_array=self.y_array[indices],
-                        env_array=self.env_array[indices],
-                        sp_array=self.sp_array[indices],
-                        transform=self.train_transform
-                    ))
-            else:
-                subsets.append(
-                    SpuriousValDataset(
-                        SubDataset(
-                            x_array=self.x_array[indices],
-                            y_array=self.y_array[indices],
-                            env_array=self.env_array[indices],
-                            sp_array=self.sp_array[indices],
-                            transform=self.train_transform
-                        )))
-
-        self.subsets = subsets
-        return tuple(subsets)
-
-def get_data_loader_cifarminst(batch_size, train_num, test_num, cons_ratios, train_envs_ratio, label_noise_ratio=None, augment_data=True, cifar_classes=(1, 9), color_spurious=False, transform_data_to_standard=1, oracle=0):
-    spdc = CifarMnistSpuriousDataset(
-        train_num=train_num,
-        test_num=test_num,
-        cons_ratios=cons_ratios,
-        train_envs_ratio=train_envs_ratio,
-        label_noise_ratio=label_noise_ratio,
-        augment_data=augment_data,
-        cifar_classes=cifar_classes,
-        color_spurious=color_spurious,
-        transform_data_to_standard=transform_data_to_standard,
-        oracle=oracle)
-    train_dataset, val_dataset, test_dataset = spdc.get_splits(
-        splits=['train','val','test'])
+def get_provider(batch_size, n_classes, env_nums, train_x=None, train_y=None, train_env=None, train_sp=None, train_transform=None, test_x=None, test_y=None, test_env=None, test_sp=None, test_transform=None):
+    class DataProvider(object):
+        def __init__(self):
+            pass
+    train_dataset = SpuriousDataset(
+        x_array=train_x,
+        y_array=train_y,
+        env_array=train_env,
+        sp_array=train_sp,
+        transform=train_transform)
+    test_dataset = SpuriousDataset(
+        x_array=test_x,
+        y_array=test_y,
+        env_array=test_env,
+        sp_array=test_sp,
+        transform=test_transform)
     train_loader = torch.utils.data.DataLoader(
         dataset=train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
-        num_workers=4)
-    val_loader = torch.utils.data.DataLoader(
-        dataset=val_dataset,
         batch_size=batch_size,
         shuffle=True,
         num_workers=4)
@@ -188,7 +125,14 @@ def get_data_loader_cifarminst(batch_size, train_num, test_num, cons_ratios, tra
         batch_size=batch_size,
         shuffle=True,
         num_workers=4)
-    return spdc, train_loader, val_loader, test_loader, train_dataset, val_dataset, test_dataset
+    dp = DataProvider()
+    dp.train_loader = train_loader
+    dp.test_loader = test_loader
+    dp.train_dataset = train_dataset
+    dp.test_dataset = test_dataset
+    dp.n_classes = n_classes
+    dp.env_nums = env_nums
+    return dp
 
 def get_transform_cub(transform_data_to_standard, train, augment_data):
 
