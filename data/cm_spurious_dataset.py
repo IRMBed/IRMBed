@@ -9,8 +9,39 @@ from PIL import Image
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, Subset
 
-class SubDataset(object):
-    def __init__(self, x_array, y_array, env_array, transform, sp_array=None):
+class SpuriousDataset(object):
+    def __init__(self, x_array, y_array, env_array, transform=None, sp_array=None):
+        """
+        Explaination of the input data
+        """
+        self.x_array = x_array
+        self.y_array = y_array
+        self.env_array = env_array
+        self.sp_array = sp_array
+        self.transform = transform
+        assert len(self.x_array) == len(self.y_array)
+        assert len(self.y_array) == len(self.env_array)
+
+    def __len__(self):
+        return len(self.x_array)
+
+    def __getitem__(self, idx):
+        y = self.y_array[idx]
+        g = self.env_array[idx]
+        if self.sp_array is not None:
+            sp = self.sp_array[idx]
+        else:
+            sp = None
+        if self.transform is not None:
+            x = self.transform(img)
+        else:
+            x = x
+
+        return x,y,g,sp
+
+
+class SubDataset(SpuriousDataset):
+    def __init__(self, x_array, y_array, env_array, transform=None, sp_array=None):
         self.x_array = x_array
         self.y_array = y_array
         self.env_array = env_array
@@ -35,7 +66,7 @@ class SubDataset(object):
         img = Image.fromarray(img)
         x = self.transform(img)
 
-        return x,y,g, sp
+        return x,y,g,sp
 
 class SpuriousValDataset(Dataset):
     def __init__(self, val_dataset):

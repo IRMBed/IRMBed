@@ -56,7 +56,6 @@ def main():
 
     if args.oracle:
         print("WARNING:Using ORACLE dataset!!!!!")
-    get_loader_x = get_data_loader_cifarminst
     train_num=10000
     test_num=1800
     if args.train_envs_ratio == "-1":
@@ -66,29 +65,33 @@ def main():
     else:
         ratio_list = [float(x) for x in args.train_envs_ratio.split("_")]
     #------------loading Cifar-Mnist Datset---#
-    args.env_nums = len(ratio_list)
-    spd, train_loader, val_loader, test_loader, train_data, val_data, test_data = get_loader_x(
-        batch_size=args.batch_size,
-        train_num=train_num,
-        test_num=test_num,
-        cons_ratios=[float(x) for x in args.cons_ratios.split("_")],
-        train_envs_ratio=ratio_list,
-        label_noise_ratio=args.label_noise_ratio,
-        color_spurious=0,
-        transform_data_to_standard=1,
-        oracle=args.oracle)
-    data={}
-    data['train_loader'] = train_loader
-    data['val_loader'] = val_loader
-    data['test_loader'] = test_loader
-    data['train_data'] = train_data
-    data['val_data'] = val_data
-    data['test_data'] = test_data
-    n_classes=spd.n_classes
-    env_nums = spd.n_train_envs
-    #---loading Cifar-Mnist Datset Ended---#
-    #---You can replace the dataset by your own--#
-    # data['train_data'], data['val_data'], data['test_data'] are the traning, validation and testing dataset, you should use the implement the dataset by the torch object Dataset().
+    if args.dataset == "SPCM":
+        get_loader_x = get_data_loader_cifarminst
+        args.env_nums = len(ratio_list)
+        spd, train_loader, val_loader, test_loader, train_data, val_data, test_data = get_loader_x(
+            batch_size=args.batch_size,
+            train_num=train_num,
+            test_num=test_num,
+            cons_ratios=[float(x) for x in args.cons_ratios.split("_")],
+            train_envs_ratio=ratio_list,
+            label_noise_ratio=args.label_noise_ratio,
+            color_spurious=0,
+            transform_data_to_standard=1,
+            oracle=args.oracle)
+        data={}
+        data['train_loader'] = train_loader
+        data['val_loader'] = val_loader
+        data['test_loader'] = test_loader
+        data['train_data'] = train_data
+        data['val_data'] = val_data
+        data['test_data'] = test_data
+        n_classes=spd.n_classes
+        env_nums = spd.n_train_envs
+        #---loading Cifar-Mnist Datset Ended---#
+    else:
+        pass
+        #---You can replace the dataset by your own--#
+        # data['train_data'], data['val_data'], data['test_data'] are the traning, validation and testing dataset, you should use the implement the dataset by the torch object Dataset().
 
     pretrained = args.pretrained
     args.env_nums = spd.n_train_envs

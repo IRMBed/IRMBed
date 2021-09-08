@@ -84,7 +84,7 @@ class EpochStat(object):
         echo_str = [self.sfx + "\n"]
         for ienv in range(len(self.envs)):
             env = self.envs[ienv]
-            if env == '-1':
+            if env == -1:
                 echo_str += ["All Envs"]
             else:
                 echo_str += ["Env%s"%env]
@@ -378,7 +378,7 @@ def run_epoch_train(
     epoch, model, optimizer, loader, loader_iter, logger, args,
               is_training,scheduler=None, irm_penalty_weight=0):
     model.train()
-    ees = EpochStat("Training the Epoch %s of %s" % (epoch+1), args.n_epochs)
+    ees = EpochStat("Training the Epoch %s of %s" % (epoch+1, args.n_epochs))
     criterion = nn.BCEWithLogitsLoss()
     if args.irm_type in ["invrat", "irmgame"]:
         inner_loader_iter = iter(loader)
@@ -465,7 +465,7 @@ def run_epoch_val(epoch, model, loader, loader_iter, logger, args, val_test):
     model.eval()
     criterion = nn.BCEWithLogitsLoss()
     # ees = EpochStat("Val%s"%epoch)
-    ees = EpochStat("Testing the Epoch %s of %s" % (epoch+1), args.n_epochs)
+    ees = EpochStat("Testing the Epoch %s of %s" % (epoch+1, args.n_epochs))
     with torch.set_grad_enabled(False):
         num_steps = len(loader)
         # print("num_steps", num_steps)
