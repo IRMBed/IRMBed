@@ -13,7 +13,7 @@ from resnet_ofc import resnet50_irmgame, resnet18_irmgame
 # resnet18 is the same structre with resnet18_invrat_ec
 from resnet_ofc import resnet18_invrat_ec as resnet18
 from resnet_ofc import resnet50_invrat_ec as resnet50
-from data.cm_spurious_dataset import get_data_loader_cifarminst
+from data.cm_spurious_dataset import CifarMnistSpuriousDataset, get_provider
 from utils import set_seed, Logger, log_args
 from train import train
 
@@ -59,8 +59,8 @@ def main():
     #------------loading Cifar-Mnist Datset---#
     if args.dataset == "SPCM":
         cons_list = [float(x) for x in args.cons_ratios.split("_")]
-        train_envs = len(cons_list) - 1
-        ratio_list = [1. / train_envs] * (train_envs)
+        train_env_num= len(cons_list) - 1
+        ratio_list = [1. / train_env_num] * (train_env_num)
         cifarminist = CifarMnistSpuriousDataset(
             train_num=10000,
             test_num=1800,
@@ -73,9 +73,9 @@ def main():
         train_x, train_y, train_env, train_sp = cifarminist.return_train_data()
         test_x, test_y, test_env, test_sp = cifarminist.return_test_data()
         dp = get_provider(
-            batch_size=batch_size,
+            batch_size=args.batch_size,
             n_classes=2,
-            env_nums=train_envs,
+            env_nums=train_env_num,
             train_x=train_x,
             train_y=train_y,
             train_env=train_env,
@@ -85,7 +85,7 @@ def main():
             test_y=test_y,
             test_env=test_env,
             test_sp=test_sp,
-            test_transform=cifarminist.eval_transform):
+            test_transform=cifarminist.eval_transform)
         #---loading Cifar-Mnist Datset Ended---#
     else:
         pass
@@ -104,21 +104,20 @@ def main():
             test_y=<your_test_y>,
             test_env=<your_test_env>,
             test_sp=<your_test_sp>,# optional
-            test_transform=<your_test_transform> # optional
-            )
+            test_transform=<your_test_transform> # optional)
         """
     data={}
     data['train_loader'] = dp.train_loader
     data['val_loader'] = dp.test_loader
     data['test_loader'] = dp.test_loader
-    data['train_data'] = dp.train_data
-    data['val_data'] = dp.test_data
-    data['test_data'] = dp.test_data
+    data['train_data'] = dp.train_dataset
+    data['val_data'] = dp.test_dataset
+    data['test_data'] = dp.test_dataset
     n_classes=dp.n_classes
     env_nums = dp.env_nums
 
     pretrained = args.pretrained
-    args.env_nums = spd.n_train_envs
+    args.env_nums = train_env
     if args.model == 'resnet18':
         model = resnet18(pretrained=pretrained, num_classes=n_classes)
     elif args.model == 'resnet50':

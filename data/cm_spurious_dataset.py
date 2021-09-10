@@ -27,6 +27,7 @@ class SpuriousDataset(object):
 
     def __getitem__(self, idx):
         y = self.y_array[idx]
+        img = self.x_array[idx]
         g = self.env_array[idx]
         if self.sp_array is not None:
             sp = self.sp_array[idx]
@@ -35,7 +36,7 @@ class SpuriousDataset(object):
         if self.transform is not None:
             x = self.transform(img)
         else:
-            x = x
+            x = img 
 
         return x,y,g,sp
 
@@ -73,7 +74,7 @@ class CifarMnistSpuriousDataset(Dataset):
     def return_train_data(self):
         return self.return_data_by_index(self.split_dict["train"])
 
-    def return_train_data(self):
+    def return_test_data(self):
         return self.return_data_by_index(self.split_dict["test"])
 
     def return_data_by_index(self, env_idx):
@@ -81,7 +82,7 @@ class CifarMnistSpuriousDataset(Dataset):
         ys = []
         gs = []
         sps = []
-        for idx in range(self.y_array):
+        for idx in range(len(self.y_array)):
             if self.split_array[idx] in env_idx:
                 x = self.x_array[idx]
                 y = self.y_array[idx]
@@ -92,11 +93,11 @@ class CifarMnistSpuriousDataset(Dataset):
                 gs.append(g)
                 sps.append(sp)
         # Figure out split and transform accordingly
-        xs = torch.stack(xs)
-        ys = torch.stack(ys)
-        gs = torch.stack(gs)
-        sps = torch.stack(sps)
-        gs = gs - gs.min()
+        xs = np.stack(xs)
+        ys = np.stack(ys)
+        gs = np.stack(gs)
+        sps = np.stack(sps)
+        gs = gs - np.min(gs)
         return xs, ys, gs, sps
 
 def get_provider(batch_size, n_classes, env_nums, train_x=None, train_y=None, train_env=None, train_sp=None, train_transform=None, test_x=None, test_y=None, test_env=None, test_sp=None, test_transform=None):
