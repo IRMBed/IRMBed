@@ -39,14 +39,21 @@ dp = get_provider(
             test_transform=<your_test_transform> # optional
     )
 ```
-* .  
+*  `train_x` and `test_x` are the feature tensor of training and testing data.
+*  `train_y` and `test_y` are the label tensor of training and testing data.
+*  `train_env` and `test_env` are the enviroment index tensor of training and testing data.
+*  (optional) `train_sp` and `test_sp` are the index of whether the spurious feature aligns with the label. In the CifarMnist example, if the spurious feature(mnist image) shows "1" and the label is also 1, then the spurious feature aligns with the label. 
+*  (optional) `train_transform` and `test_transform` the transformation function of the feature tensor, i.e. the data augmentation.
+* Besides passing the data to `get_provider`, you need to pass the batch size, the number of classes and number of train envs to `batch_size`, `n_classes` and `env_nums`, respectively.
+  
 
 ### Outputs
 The project outputs the trained model and prints the performance of the model.
   * The trained model is saved in `results/model.pth`;
   * The performance of the model on each environment of training and testing dataset at each epoch: 
     * `loss` is the empirical loss, `penalty` is the invariance penalty and `main_loss` is the weighted sum of `loss` and `penalty` by the irm penalty weight;
-    * `acc` is the precision of the model on the data from a specific environment; `major_acc` and `minor_acc`
+    * `acc` is the precision of the model on the data from a specific environment; 
+    * `major_acc` and `minor_acc` refers to the precision on two subsets of the data. In dataset with spurious feature, spurious feature align with label in most cases, i.e.  the spurious feature(mnist image) shows "1" mostly when the label is also 1 in the CifarMnist dataset. The "major acc" is the precision in the subset of the data where the spurious feature align with the label; "minor acc" is the precision in the subset of the data where the spurious feature not align with the label.
 
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
