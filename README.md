@@ -1,21 +1,11 @@
-### IRMBed: the test bed for IRM methods on deep models
+# IRMBed: the test bed for IRM methods on deep models
 HI, this is the project of ICML2021 workshop UDL paper by Yong Lin, Qing Lian and Tong Zhang: [`An Empirical Study of Invariant Risk Minimization on Deep Models.`](http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-044.pdf)
 
 We aim to study IRM methods on deep models. Now, Resnet18 amd Resnet50 are supported.
 
 We offer the implementation of IRMv1[1], InvRat[2], REx[3], RVP[4], IRMGame[5].
-### Requirements
-The program runs with the following packages.
-```
-pandas==1.1.5
-pytorch-transformers==1.2.0
-torch==1.3.1
-torchvision==0.4.2
-tqdm==4.26.0
-numpy==1.19.4
-```
-To install the required packages, please run `pip install -r requirements.txt`
-### Datasets
+
+# Datasets
 #### MNIST-Cifar10
 Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant. The illustration of the dataset is shown as following:
 ![Illustration of the synthetic dataset from CIFAR-10 and MNIST. We first randomly select two classes ("car" and "bird") from CIFAR-10. Then each CIFAR-10 image is concatanated with an image from MNIST ("0" and "1"). The CIFAR-10  component serves as the invariant feature and the label is generated from the CIFAR-10 component. The MNIST component serves as the spurious feature. The MNIST component is highly correlated with the label in the training dataset,  however, the correlation reverses in the testing dataset. ](./dataset_illustration.png)
@@ -44,7 +34,7 @@ dp = get_provider(
 *  `train_env` and `test_env` are the enviroment index tensor of training and testing data.
 *  (optional) `train_sp` and `test_sp` are the index of whether the spurious feature aligns with the label. In the CifarMnist example, if the spurious feature(mnist image) shows "1" and the label is also 1, then the spurious feature aligns with the label. 
 *  (optional) `train_transform` and `test_transform` the transformation function of the feature tensor, i.e. the data augmentation.
-* Besides passing the data to `get_provider`, you need to pass the batch size, the number of classes and number of train envs to `batch_size`, `n_classes` and `env_nums`, respectively.
+*  Besides passing the data to `get_provider`, you need to pass the batch size, the number of classes and number of train envs to `batch_size`, `n_classes` and `env_nums`, respectively.
   
 
 ### Outputs
@@ -53,7 +43,7 @@ The project outputs the trained model and prints the performance of the model.
   * The performance of the model on each environment of training and testing dataset at each epoch: 
     * `loss` is the empirical loss, `penalty` is the invariance penalty and `main_loss` is the weighted sum of `loss` and `penalty` by the irm penalty weight;
     * `acc` is the precision of the model on the data from a specific environment; 
-    * `major_acc` and `minor_acc` refers to the precision on two subsets of the data. In dataset with spurious feature, spurious feature align with label in most cases, i.e.  the spurious feature(mnist image) shows "1" mostly when the label is also 1 in the CifarMnist dataset. The "major acc" is the precision in the subset of the data where the spurious feature align with the label; "minor acc" is the precision in the subset of the data where the spurious feature not align with the label.
+    * `major_acc` and `minor_acc` refers to the precision on two subsets of the data. In a dataset with a spurious feature, the spurious feature aligns with the label in most cases, i.e.  the spurious feature(mnist image) shows "1" mostly when the label is also 1 in the CifarMnist dataset. The "major acc" is the precision in the subset of the data where the spurious feature align with the label; "minor acc" is the precision of the remaining dataset.
 
 ### Results
 We consider two settings for the training sets: 1). 2 Env: the training data contains two environments, in which the spurious correlations are 99.9\% and 80.0\%, respectively, 2). 4 Env: the training data contains four environments, in which the spurious correlations are 99.9%, 95.0%, 90.0%, 80.0%, respectively. In both settings, we set the correlation of spurious features to 10% in test environment to see whether the learned model relies on the spurious feature. We also add a certain level (10%) of noise to label as [1] does. 
@@ -70,12 +60,24 @@ We consider two settings for the training sets: 1). 2 Env: the training data con
 
 
 For detailed explanation of these results, please refer to our workshop paper.
-### Quick Start
-How to run the code?Here is an exmaple for InvRat-EC.
+
+# Quick Start
+#### Requirements
+The program runs with the following packages.
+```
+pandas==1.1.5
+pytorch-transformers==1.2.0
+torch==1.3.1
+torchvision==0.4.2
+tqdm==4.26.0
+numpy==1.19.4
+```
+To install the required packages, please run `pip install -r requirements.txt`
+#### Run the Code
+How to run the code? Here is an exmaple for InvRat-EC.
 ```
 CUDA_VISIBLE_DEVICES=<GPU_ID> python run.py  -d SPCM --cons_ratios 0.999_0.95_0.9_0.8_0.1 --label_noise_ratio 0.10 --irm_type invrat  --lr 0.01 --batch_size 128 --weight_decay 0.0001 --model resnet18_invrat_ec --n_epoch 100  --opt SGD  --irm_penalty --irm_penalty_weight 100 --num_inners 1  --irm_anneal_epochs 2 --seed 0
 ```
-### Set the pramater
 Here are some important parameters for the program.
 * `cons_ratios` # setting of environment. 
 cons_ratios specify the correlation of the spurious feature with the label for both training and testing data set.
@@ -93,7 +95,12 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 * `num_inners`" # number of inner steps for `invrat`.
 
 
-### Citation
+# Contact
+Please submit a github issue if you have any problem on this project.
+You can also send email to `ylindf@connect.ust.hk` for personal contact.
+If you are also interested in IRM and want to discuss with me, you can also chat with me(`linyongverycool`) by Wechat. 
+
+# Citation
 ```
 @article{yong2021empirical,
   title={An Empirical Study of Invariant Risk Minimization on Deep Models},
@@ -103,7 +110,7 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 }
 ```
 
-### References
+# References
 [1] Arjovsky, M., Bottou, L., Gulrajani, I., & Lopez-Paz, D.  Invariant risk minimization.
 
 [2] Chang, S., Zhang, Y., Yu, M., & Jaakkola, T.  Invariant rationalization.
@@ -116,7 +123,3 @@ For example,  `0.999_0.95_0.9_0.8_0.1` stands for 4 enviornments in training dat
 
 [6] Shah, Harshay and Tamuly, Kaustav and Raghunathan, Aditi and Jain, Prateek and Netrapalli, Praneeth. The pitfalls of simplicity bias in neural networks
 
-### Contact
-Please submit a github issue if you have any problem on this project.
-You can also send email to `ylindf@connect.ust.hk` for personal contact.
-If you are also interested in IRM and want to discuss with me, you can also chat with me(`linyongverycool`) by Wechat. 
