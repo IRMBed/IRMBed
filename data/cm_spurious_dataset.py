@@ -34,9 +34,13 @@ class SpuriousDataset(object):
         else:
             sp = None
         if self.transform is not None:
+            img = self.x_array[idx]
+            img = (img *255).astype(np.uint8)
+            img = img.transpose(1, 2, 0)
+            img = Image.fromarray(img)
             x = self.transform(img)
         else:
-            x = img 
+            x = self.x_array[idx]
 
         return x,y,g,sp
 
