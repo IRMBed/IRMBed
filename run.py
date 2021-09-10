@@ -80,12 +80,12 @@ def main():
             train_y=train_y,
             train_env=train_env,
             train_sp=train_sp,
-            train_transform=cifarminist.train_transform,
+            train_transform=cifarminist.transform,
             test_x=test_x,
             test_y=test_y,
             test_env=test_env,
             test_sp=test_sp,
-            test_transform=cifarminist.eval_transform)
+            test_transform=cifarminist.transform)
         #---loading Cifar-Mnist Datset Ended---#
     else:
         pass
@@ -107,6 +107,8 @@ def main():
             test_transform=<your_test_transform> # optional)
         """
     data={}
+    # import pdb
+    # pdb.set_trace()
     data['train_loader'] = dp.train_loader
     data['val_loader'] = dp.test_loader
     data['test_loader'] = dp.test_loader

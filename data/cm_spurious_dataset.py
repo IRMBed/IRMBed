@@ -72,8 +72,8 @@ class CifarMnistSpuriousDataset(Dataset):
             "val": [len(self.cons_ratios) - 1],
             "test": [len(self.cons_ratios) - 1]}
         self.n_classes = 2
-        self.train_transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=True, augment_data=self.augment_data)
-        self.eval_transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=False, augment_data=False)
+        self.transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=True, augment_data=self.augment_data)
+        # self.eval_transform = get_transform_cub(transform_data_to_standard=self.transform_data_to_standard, train=False, augment_data=False)
 
     def return_train_data(self):
         return self.return_data_by_index(self.split_dict["train"])
