@@ -20,10 +20,26 @@ To install the required packages, please run `pip install -r requirements.txt`
 Inspired by [6], we construct a Cifar-MNIST dataset, in which each image is synthesized by concating two component images, one from Cifar and the other from MNIST. We make the Cifar and MNIST component behave as invariant and spurious features, respectively.  Specifically, the label of the synthesized image is generated from the Cifar component and the MNIST component exhibit a high but unstable correlation with the label. Following [1], we construct several environments. The MNIST component's correlation with label is changing across different environments while the Cifar component's correlation remains invariant. The illustration of the dataset is shown as following:
 ![Illustration of the synthetic dataset from CIFAR-10 and MNIST. We first randomly select two classes ("car" and "bird") from CIFAR-10. Then each CIFAR-10 image is concatanated with an image from MNIST ("0" and "1"). The CIFAR-10  component serves as the invariant feature and the label is generated from the CIFAR-10 component. The MNIST component serves as the spurious feature. The MNIST component is highly correlated with the label in the training dataset,  however, the correlation reverses in the testing dataset. ](./dataset_illustration.png)
 
-#### User Input Dataset
-IRMBed also provide interface for user specified dataset. Two steps are needed to 
-* Implement the `SpuriousDataset` in `data/data.py` by passing `x`(the feature tensor), `y`(the label tensor), `e`(the environment index tensor) and `sp`(optional, the tensor of indicators that whether the spurious features are consistent with the label).
-* Pass the Trainging and Testing dataset to `data_processor` in `run.py`. In addition, one also need to  provide the total environment number `env_nums` and class number`n_classes`.  
+#### Input Your Own Data
+IRMBed also provide interface for user specified dataset. User need to pass the data to the function `get_provider` as following: 
+```
+dp = get_provider(
+            batch_size=<batch_size>,
+            n_classes=<number of classes>,
+            env_nums=<number of train envs>,
+            train_x=<your_train_x>,
+            train_y=<your_train_y>,
+            train_env=<your_train_env>,
+            train_sp=<your_train_sp>,# optional
+            train_transform=<your_train_transform>,# optional
+            test_x=<your_test_x>,
+            test_y=<your_test_y>,
+            test_env=<your_test_env>,
+            test_sp=<your_test_sp>,# optional
+            test_transform=<your_test_transform> # optional
+    )
+```
+* .  
 
 ### Outputs
 The project outputs the trained model and prints the performance of the model.
