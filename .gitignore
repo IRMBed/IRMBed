@@ -1,4 +1,5 @@
 *.txt
+*.pth
 tmp
 datasets
 tmp*

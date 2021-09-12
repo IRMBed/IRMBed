@@ -141,6 +141,12 @@ def main():
 
 
     train(model, data, None, args)
+    output_path = "results"
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    target_file = os.path.join(output_path, 'model.pth')
+    print("Outputing file to %s."% target_file)
+    torch.save(model, target_file)
 
 if __name__=='__main__':
     main()
