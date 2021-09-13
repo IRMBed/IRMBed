@@ -1,9 +1,9 @@
 # IRMBed: the test bed for IRM methods on deep models
 HI, this is the project of ICML2021 workshop UDL paper by Yong Lin, Qing Lian and Tong Zhang: [`An Empirical Study of Invariant Risk Minimization on Deep Models.`](http://www.gatsby.ucl.ac.uk/~balaji/udl2021/accepted-papers/UDL2021-paper-044.pdf)
 
-We aim to study IRM methods on deep models. Now, Resnet18 amd Resnet50 are supported.
+```Invariant Risk Minimization(IRM) is a promising framework to prevent the model from relying on spurious features. Various variants of IRM have been proposed since the initial work[1]. However, can IRM and its variants work well on deep models (e.g. ResNet-18 and ResNet-50)? Except for several negative results of IRMv1 mentioned, this question remains underexplored in the existing works. In this work, we undertake an extensive empirical evaluation of IRM methods on deep models with a synthetic dataset from Cifar and MNIST. We find several popular IRM variants, i.e. IRMv1 and REx, performs poorly on ResNet-50 in the considered setting. InvRat with a certain parameterization successfully learn an invariant model on ResNet-50.```
 
-We offer the implementation of IRMv1[1], InvRat[2], REx[3], RVP[4], IRMGame[5].
+Different from existing works and projects on IRM, this project aims to study IRM methods on deep models.  Now, ResNet-18 amd ResNet-50 are supported. We offer the implementation of IRMv1[1], InvRat[2], REx[3], RVP[4], IRMGame[5].
 
 # Datasets
 #### MNIST-Cifar10
