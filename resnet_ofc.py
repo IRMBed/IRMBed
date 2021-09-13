@@ -328,7 +328,6 @@ class ResNetSepFcOFC(nn.Module):
             else:
                 raise Exception
             if args.lr_schedule_type == "step":
-                print("step_gamma=%s" % args.step_gamma)
                 scheduler_rep = lr_scheduler.StepLR(optimizer_rep, step_size=int(args.n_epochs/3.), gamma=args.step_gamma)
                 scheduler_sep = lr_scheduler.StepLR(optimizer_sep, step_size=int(args.n_epochs), gamma=args.step_gamma)
                 scheduler_share = lr_scheduler.StepLR(optimizer_share, step_size=int(args.n_epochs/3.), gamma=args.step_gamma)
